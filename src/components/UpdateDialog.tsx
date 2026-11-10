@@ -36,37 +36,37 @@ export const UpdateDialog: React.FC<UpdateDialogProps> = ({ release, onDismiss }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-      <div className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-emerald-200 dark:border-emerald-800 p-6 text-center space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in">
+      <div className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-emerald-400 dark:border-emerald-700 p-6 text-center space-y-4">
         
         {/* Animated Icon */}
-        <div className="w-16 h-16 mx-auto rounded-3xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/10">
+        <div className="w-16 h-16 mx-auto rounded-3xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shadow-lg shadow-emerald-500/10 border border-emerald-300 dark:border-emerald-800">
           <Sparkles className="w-8 h-8 animate-pulse" />
         </div>
 
         <div>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
             Actualización de la App
           </span>
-          <h2 className="text-xl font-black text-gray-900 dark:text-white mt-0.5">
+          <h2 className="text-2xl font-black text-gray-950 dark:text-white mt-0.5">
             ¡Nueva versión {release.tagName}!
           </h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 font-semibold">
             Tienes la versión v{CURRENT_APP_VERSION}. Actualiza para tener las últimas mejoras y correcciones.
           </p>
         </div>
 
         {/* Release notes summary */}
         {release.body && (
-          <div className="p-3 bg-gray-50 dark:bg-gray-700/40 rounded-2xl text-left max-h-24 overflow-y-auto text-xs text-gray-600 dark:text-gray-300">
-            <p className="font-bold text-gray-800 dark:text-gray-200 mb-1">Novedades:</p>
-            <p className="whitespace-pre-line text-[11px]">{release.body}</p>
+          <div className="p-3.5 bg-gray-100 dark:bg-gray-700/60 rounded-2xl text-left max-h-28 overflow-y-auto text-xs text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 font-medium">
+            <p className="font-black text-gray-950 dark:text-white mb-1">Novedades:</p>
+            <p className="whitespace-pre-line text-xs">{release.body}</p>
           </div>
         )}
 
         {/* Error message */}
         {error && (
-          <div className="p-2.5 rounded-xl bg-rose-100 text-rose-700 text-xs font-bold">
+          <div className="p-3 rounded-xl bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-100 text-xs font-black">
             {error}
           </div>
         )}
@@ -74,7 +74,7 @@ export const UpdateDialog: React.FC<UpdateDialogProps> = ({ release, onDismiss }
         {/* Progress Bar */}
         {downloading && (
           <div className="space-y-1.5 text-left">
-            <div className="flex justify-between text-xs font-black text-emerald-600">
+            <div className="flex justify-between text-xs font-black text-emerald-700 dark:text-emerald-300">
               <span>Descargando...</span>
               <span>{progress}%</span>
             </div>
@@ -84,7 +84,7 @@ export const UpdateDialog: React.FC<UpdateDialogProps> = ({ release, onDismiss }
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-[11px] text-gray-400 text-center pt-1">
+            <p className="text-xs text-gray-600 dark:text-gray-300 font-bold text-center pt-1">
               La actualización se instalará automáticamente al terminar.
             </p>
           </div>
@@ -103,7 +103,7 @@ export const UpdateDialog: React.FC<UpdateDialogProps> = ({ release, onDismiss }
 
             <button
               onClick={onDismiss}
-              className="w-full py-3 px-4 text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition"
+              className="w-full py-3 px-4 text-xs font-bold text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition"
             >
               Recordar más tarde
             </button>

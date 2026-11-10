@@ -1,7 +1,7 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
 import type { GitHubRelease } from '../types';
 
-export const CURRENT_APP_VERSION = '1.0.0';
+export const CURRENT_APP_VERSION = '1.0.1';
 
 export interface DownloadProgressInfo {
   progress: number; // 0 to 100

@@ -60,15 +60,25 @@ export const App: React.FC = () => {
   // Apply Theme
   useEffect(() => {
     const root = document.documentElement;
-    const isDark =
-      settings.theme === 'dark' ||
-      (settings.theme === 'system' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    const applyTheme = () => {
+      const isDark =
+        settings.theme === 'dark' ||
+        (settings.theme === 'system' && mediaQuery.matches);
+
+      if (isDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    };
+
+    applyTheme();
+
+    if (settings.theme === 'system') {
+      mediaQuery.addEventListener('change', applyTheme);
+      return () => mediaQuery.removeEventListener('change', applyTheme);
     }
   }, [settings.theme]);
 
@@ -80,7 +90,8 @@ export const App: React.FC = () => {
   };
 
   const handleToggleTheme = () => {
-    const nextTheme: ThemeMode = settings.theme === 'dark' ? 'light' : 'dark';
+    const isCurrentlyDark = document.documentElement.classList.contains('dark');
+    const nextTheme: ThemeMode = isCurrentlyDark ? 'light' : 'dark';
     handleUpdateSettings({ theme: nextTheme });
   };
 

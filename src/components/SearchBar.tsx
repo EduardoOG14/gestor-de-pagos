@@ -26,18 +26,18 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     <div className="space-y-3">
       {/* Search Input Box */}
       <div className="relative flex items-center">
-        <Search className="w-5 h-5 absolute left-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+        <Search className="w-5 h-5 absolute left-3.5 text-gray-500 dark:text-gray-400 pointer-events-none" />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar deudor por nombre (ej. Carlos)..."
-          className="w-full pl-11 pr-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xs transition"
+          className="w-full pl-11 pr-10 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-2xl text-base font-semibold text-gray-950 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-xs transition"
         />
         {searchTerm && (
           <button
             onClick={() => onSearchChange('')}
-            className="absolute right-3 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            className="absolute right-3 p-1.5 rounded-full text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
             aria-label="Limpiar búsqueda"
           >
             <X className="w-4 h-4" />
@@ -45,46 +45,46 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         )}
       </div>
 
-      {/* Filter Chips - Big and Easy to Tap */}
+      {/* Filter Chips - Big, High Contrast, Easy to Tap */}
       <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
         <button
           onClick={() => onFilterChange('ALL')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-2xl text-xs font-black transition-colors whitespace-nowrap flex items-center gap-1.5 border-2 ${
             activeFilter === 'ALL'
-              ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-xs'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50'
+              ? 'bg-gray-950 text-white border-gray-950 dark:bg-white dark:text-gray-950 dark:border-white shadow-xs'
+              : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50'
           }`}
         >
           <span>Todos</span>
-          <span className="px-1.5 py-0.2 rounded-md bg-black/10 dark:bg-black/20 text-[10px]">
+          <span className="px-1.5 py-0.5 rounded-md bg-black/15 dark:bg-black/25 text-[10px]">
             {totalCount}
           </span>
         </button>
 
         <button
           onClick={() => onFilterChange('PENDING')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-2xl text-xs font-black transition-colors whitespace-nowrap flex items-center gap-1.5 border-2 ${
             activeFilter === 'PENDING'
-              ? 'bg-rose-600 text-white shadow-xs'
-              : 'bg-white dark:bg-gray-800 text-rose-600 dark:text-rose-400 border border-gray-200 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-rose-950/20'
+              ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
+              : 'bg-white dark:bg-gray-800 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950/30'
           }`}
         >
           <span>Con Deuda</span>
-          <span className="px-1.5 py-0.2 rounded-md bg-rose-700/20 text-[10px]">
+          <span className="px-1.5 py-0.5 rounded-md bg-rose-700/20 dark:bg-rose-400/20 text-[10px]">
             {pendingCount}
           </span>
         </button>
 
         <button
           onClick={() => onFilterChange('CLEARED')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-2xl text-xs font-black transition-colors whitespace-nowrap flex items-center gap-1.5 border-2 ${
             activeFilter === 'CLEARED'
-              ? 'bg-emerald-600 text-white shadow-xs'
-              : 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20'
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+              : 'bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
           }`}
         >
           <span>Al Día</span>
-          <span className="px-1.5 py-0.2 rounded-md bg-emerald-700/20 text-[10px]">
+          <span className="px-1.5 py-0.5 rounded-md bg-emerald-700/20 dark:bg-emerald-400/20 text-[10px]">
             {clearedCount}
           </span>
         </button>

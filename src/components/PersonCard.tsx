@@ -38,6 +38,9 @@ export const PersonCard: React.FC<PersonCardProps> = ({
     window.open(url, '_blank');
   };
 
+  const lastTx = person.lastTransaction;
+  const isLastTxDebt = lastTx?.type === 'DEBT';
+
   return (
     <div
       onClick={onClick}
@@ -49,37 +52,37 @@ export const PersonCard: React.FC<PersonCardProps> = ({
           onClick();
         }
       }}
-      className={`relative w-full text-left bg-white dark:bg-gray-800 rounded-3xl p-4.5 border transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md active:scale-[0.99] select-none ${
+      className={`relative w-full text-left bg-white dark:bg-gray-800 rounded-3xl p-4.5 border-2 transition-all duration-150 cursor-pointer shadow-sm hover:shadow-md active:scale-[0.99] select-none ${
         isOwing
-          ? 'border-rose-200 dark:border-rose-900/60 bg-linear-to-r from-white via-white to-rose-50/30 dark:from-gray-800 dark:to-rose-950/20'
+          ? 'border-rose-300 dark:border-rose-800/80 bg-white dark:bg-gray-800'
           : 'border-gray-200 dark:border-gray-700'
       }`}
     >
       {/* Top Row: Name and Balance Badge */}
-      <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="flex items-start justify-between gap-3 mb-2.5">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-black text-gray-900 dark:text-white truncate leading-snug">
+          <h3 className="text-xl font-black text-gray-950 dark:text-white truncate leading-snug">
             {person.name}
           </h3>
           {person.notes && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5 font-normal">
+            <p className="text-xs text-gray-700 dark:text-gray-300 truncate mt-0.5 font-medium">
               {person.notes}
             </p>
           )}
         </div>
 
-        {/* Big Balance Badge */}
+        {/* Big Balance Badge - High Contrast */}
         <div className="text-right shrink-0">
           <div
-            className={`inline-flex flex-col items-end px-3 py-1.5 rounded-2xl ${
+            className={`inline-flex flex-col items-end px-3.5 py-1.5 rounded-2xl border ${
               isOwing
-                ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+                ? 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950 dark:text-rose-100 dark:border-rose-800'
                 : isCleared
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                : 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
+                ? 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-100 dark:border-emerald-800'
+                : 'bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-950 dark:text-blue-100 dark:border-blue-800'
             }`}
           >
-            <span className="text-[10px] font-extrabold uppercase tracking-wider">
+            <span className="text-[10px] font-black uppercase tracking-wider">
               {isOwing ? 'Debe Total' : isCleared ? 'Al Día' : 'Saldo a Favor'}
             </span>
             <span className="text-lg font-black leading-tight tracking-tight">
@@ -89,33 +92,48 @@ export const PersonCard: React.FC<PersonCardProps> = ({
         </div>
       </div>
 
-      {/* Middle Row: Last transaction hint */}
-      {person.lastTransaction && (
-        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-3.5 bg-gray-50 dark:bg-gray-700/40 px-3 py-1.5 rounded-xl">
-          <Clock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+      {/* Middle Row: Last transaction hint - Clean, High Contrast, Super Legible */}
+      {lastTx && (
+        <div
+          className={`flex items-center gap-2 text-xs mb-3.5 px-3 py-2 rounded-2xl border font-medium ${
+            isLastTxDebt
+              ? 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-gray-900 dark:text-gray-100'
+              : 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/60 text-gray-900 dark:text-gray-100'
+          }`}
+        >
+          <Clock className="w-4 h-4 shrink-0 text-gray-600 dark:text-gray-300" />
+          <span className="font-extrabold uppercase text-[10px] tracking-wider text-gray-700 dark:text-gray-300 shrink-0">
+            Último:
+          </span>
           <span className="truncate">
-            Último:{' '}
-            <strong className="font-semibold text-gray-700 dark:text-gray-200">
-              {person.lastTransaction.type === 'DEBT' ? 'Deuda' : 'Abono'} ({currencySymbol}
-              {person.lastTransaction.amount})
+            <strong
+              className={`font-black ${
+                isLastTxDebt
+                  ? 'text-rose-700 dark:text-rose-300'
+                  : 'text-emerald-700 dark:text-emerald-300'
+              }`}
+            >
+              {isLastTxDebt ? '➕ Deuda' : '💰 Abono'} ({currencySymbol}{lastTx.amount})
             </strong>{' '}
-            - {person.lastTransaction.concept}
+            <span className="text-gray-800 dark:text-gray-200 font-semibold">
+              · {lastTx.concept}
+            </span>
           </span>
         </div>
       )}
 
       {/* Bottom Row: Quick Action Buttons (Don't Make Me Think) */}
-      <div className="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+      <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
         {/* Quick Payment Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onAddPayment();
           }}
-          className="flex-1 py-2.5 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition"
+          className="flex-1 py-3 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-sm transition"
           title="Registrar un abono o pago de esta persona"
         >
-          <MinusCircle className="w-4 h-4 text-emerald-200" />
+          <MinusCircle className="w-4 h-4 text-emerald-100" />
           <span>Abonar</span>
         </button>
 
@@ -125,17 +143,17 @@ export const PersonCard: React.FC<PersonCardProps> = ({
             e.stopPropagation();
             onAddDebt();
           }}
-          className="flex-1 py-2.5 px-3 rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition"
+          className="flex-1 py-3 px-3 rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-sm transition"
           title="Añadir una nueva deuda a esta persona"
         >
-          <PlusCircle className="w-4 h-4 text-rose-200" />
+          <PlusCircle className="w-4 h-4 text-rose-100" />
           <span>+ Deuda</span>
         </button>
 
         {/* WhatsApp Button */}
         <button
           onClick={handleWhatsApp}
-          className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 flex items-center justify-center transition shrink-0"
+          className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center transition shrink-0"
           title="Enviar recordatorio de deuda por WhatsApp"
           aria-label="Recordar por WhatsApp"
         >
@@ -143,7 +161,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({
         </button>
 
         {/* Open Details Arrow */}
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 group-hover:text-gray-600 shrink-0">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-gray-700 shrink-0">
           <ChevronRight className="w-5 h-5" />
         </div>
       </div>

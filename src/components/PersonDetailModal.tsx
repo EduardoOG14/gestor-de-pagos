@@ -68,27 +68,27 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="w-full sm:max-w-xl max-h-[92vh] sm:max-h-[85vh] bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
+      <div className="w-full sm:max-w-xl max-h-[92vh] sm:max-h-[85vh] bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border-2 border-gray-300 dark:border-gray-700">
         
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50/80 dark:bg-gray-800/80">
+        <div className="p-4.5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
           <div className="flex-1 min-w-0 pr-3">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <span className="text-[11px] font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">
               Ficha del Deudor
             </span>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white truncate">
+            <h2 className="text-2xl font-black text-gray-950 dark:text-white truncate">
               {person.name}
             </h2>
             {person.notes && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-xs text-gray-700 dark:text-gray-300 truncate font-semibold">
                 {person.notes}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 transition shrink-0"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition shrink-0"
             aria-label="Cerrar ventana"
           >
             <X className="w-5 h-5" />
@@ -96,24 +96,24 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto p-4 space-y-4 flex-1">
+        <div className="overflow-y-auto p-4 sm:p-5 space-y-4 flex-1">
           {/* Main Debt Display Box */}
           <div
-            className={`rounded-3xl p-5 text-center border ${
+            className={`rounded-3xl p-5 text-center border-2 ${
               isOwing
-                ? 'bg-rose-50 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900/60'
+                ? 'bg-rose-50 border-rose-300 dark:bg-rose-950/40 dark:border-rose-800'
                 : isCleared
-                ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-900/60'
-                : 'bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/60'
+                ? 'bg-emerald-50 border-emerald-300 dark:bg-emerald-950/40 dark:border-emerald-800'
+                : 'bg-blue-50 border-blue-300 dark:bg-blue-950/40 dark:border-blue-800'
             }`}
           >
             <span
               className={`text-xs font-black uppercase tracking-wider ${
                 isOwing
-                  ? 'text-rose-600 dark:text-rose-400'
+                  ? 'text-rose-800 dark:text-rose-200'
                   : isCleared
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-blue-600 dark:text-blue-400'
+                  ? 'text-emerald-800 dark:text-emerald-200'
+                  : 'text-blue-800 dark:text-blue-200'
               }`}
             >
               {isOwing ? 'Deuda Total Pendiente' : isCleared ? 'Cuenta Saldada (Al Día)' : 'Saldo a Favor'}
@@ -121,15 +121,15 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
             <div
               className={`text-4xl sm:text-5xl font-black tracking-tight my-1.5 ${
                 isOwing
-                  ? 'text-rose-600 dark:text-rose-400'
+                  ? 'text-rose-700 dark:text-rose-300'
                   : isCleared
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-blue-600 dark:text-blue-400'
+                  ? 'text-emerald-700 dark:text-emerald-300'
+                  : 'text-blue-700 dark:text-blue-300'
               }`}
             >
               {currencySymbol} {formattedAmount}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-700 dark:text-gray-300 font-bold">
               {transactions.length}{' '}
               {transactions.length === 1 ? 'movimiento registrado' : 'movimientos registrados'}
             </p>
@@ -137,19 +137,19 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
 
           {/* Quick Contact Bar if Phone is present */}
           {person.phone && (
-            <div className="flex items-center gap-2 p-2.5 bg-gray-100 dark:bg-gray-700/50 rounded-2xl">
-              <span className="text-xs text-gray-600 dark:text-gray-300 flex-1 truncate font-medium pl-1">
+            <div className="flex items-center gap-2 p-3 bg-gray-100 dark:bg-gray-700/60 rounded-2xl border border-gray-300 dark:border-gray-600">
+              <span className="text-xs text-gray-900 dark:text-white flex-1 truncate font-bold pl-1">
                 📞 {person.phone}
               </span>
               <button
                 onClick={handleCall}
-                className="px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-600 flex items-center gap-1 shadow-2xs"
+                className="px-3.5 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl text-xs font-bold border border-gray-300 dark:border-gray-600 flex items-center gap-1.5 shadow-2xs hover:bg-gray-50"
               >
                 <Phone className="w-3.5 h-3.5" /> Llamar
               </button>
               <button
                 onClick={handleWhatsApp}
-                className="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs hover:bg-emerald-700"
+                className="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs hover:bg-emerald-700"
               >
                 <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
               </button>
@@ -160,17 +160,17 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
           <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={onAddPayment}
-              className="py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition active:scale-[0.98]"
+              className="py-4 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition active:scale-[0.98]"
             >
-              <MinusCircle className="w-5 h-5 text-emerald-200" />
+              <MinusCircle className="w-5 h-5 text-emerald-100" />
               <span>Registrar Abono (-)</span>
             </button>
 
             <button
               onClick={onAddDebt}
-              className="py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md shadow-rose-600/20 transition active:scale-[0.98]"
+              className="py-4 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md shadow-rose-600/20 transition active:scale-[0.98]"
             >
-              <PlusCircle className="w-5 h-5 text-rose-200" />
+              <PlusCircle className="w-5 h-5 text-rose-100" />
               <span>Anotar Deuda (+)</span>
             </button>
           </div>
@@ -179,7 +179,7 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
           {isOwing && (
             <button
               onClick={onQuickSettle}
-              className="w-full py-3 px-4 rounded-2xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 font-extrabold text-xs flex items-center justify-center gap-2 transition border border-emerald-300 dark:border-emerald-800"
+              className="w-full py-3.5 px-4 rounded-2xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-950 dark:text-emerald-100 font-black text-xs flex items-center justify-center gap-2 transition border-2 border-emerald-300 dark:border-emerald-700 shadow-2xs"
             >
               <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>Saldar Deuda Completa ({currencySymbol}{formattedAmount})</span>
@@ -188,13 +188,13 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
 
           {/* Movement History / Timeline */}
           <div className="pt-2">
-            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-gray-500" />
+            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-300" />
               Historial de Movimientos
             </h3>
 
             {sortedTransactions.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+              <div className="p-6 text-center text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700">
                 Aún no hay movimientos registrados.
               </div>
             ) : (
@@ -210,14 +210,14 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
                   return (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700"
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-2xs"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                             isTxDebt
-                              ? 'bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400'
-                              : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400'
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
+                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
                           }`}
                         >
                           {isTxDebt ? (
@@ -227,10 +227,10 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                          <p className="text-sm font-black text-gray-950 dark:text-white truncate">
                             {tx.concept}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{dateStr}</p>
+                          <p className="text-xs text-gray-700 dark:text-gray-300 font-bold">{dateStr}</p>
                         </div>
                       </div>
 
@@ -238,8 +238,8 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
                         <span
                           className={`text-base font-black tracking-tight ${
                             isTxDebt
-                              ? 'text-rose-600 dark:text-rose-400'
-                              : 'text-emerald-600 dark:text-emerald-400'
+                              ? 'text-rose-700 dark:text-rose-300'
+                              : 'text-emerald-700 dark:text-emerald-300'
                           }`}
                         >
                           {isTxDebt ? '+' : '-'} {currencySymbol}
@@ -260,7 +260,7 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
                             </button>
                             <button
                               onClick={() => setDeletingTxId(null)}
-                              className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-[10px] font-bold rounded-lg"
+                              className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 text-[10px] font-bold rounded-lg"
                             >
                               No
                             </button>
@@ -268,7 +268,7 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
                         ) : (
                           <button
                             onClick={() => setDeletingTxId(tx.id)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-300 transition"
                             title="Eliminar este movimiento"
                             aria-label="Eliminar movimiento"
                           >
@@ -286,21 +286,21 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
           {/* Delete Person Area */}
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             {showConfirmDeletePerson ? (
-              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-center space-y-2">
-                <div className="flex items-center justify-center gap-1.5 text-rose-700 dark:text-rose-300 font-bold text-xs">
-                  <AlertTriangle className="w-4 h-4" />
+              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border-2 border-rose-300 dark:border-rose-800 text-center space-y-2">
+                <div className="flex items-center justify-center gap-1.5 text-rose-900 dark:text-rose-100 font-bold text-xs">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
                   <span>¿Seguro que deseas eliminar a {person.name} del cuaderno?</span>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={onDeletePerson}
-                    className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl"
+                    className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl"
                   >
                     Sí, Eliminar Definitivamente
                   </button>
                   <button
                     onClick={() => setShowConfirmDeletePerson(false)}
-                    className="flex-1 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl"
+                    className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl"
                   >
                     Cancelar
                   </button>
@@ -309,7 +309,7 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
             ) : (
               <button
                 onClick={() => setShowConfirmDeletePerson(true)}
-                className="w-full py-2.5 text-xs font-bold text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 transition flex items-center justify-center gap-1"
+                className="w-full py-2.5 text-xs font-bold text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300 transition flex items-center justify-center gap-1"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Eliminar a este deudor del cuaderno</span>
