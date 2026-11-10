@@ -12,7 +12,7 @@ import {
   FileUp,
 } from 'lucide-react';
 import type { AppSettings, GitHubRelease } from '../types';
-import { CURRENT_APP_VERSION, fetchLatestRelease, isNewerVersion, downloadAndInstallApk } from '../services/updateService';
+import { CURRENT_APP_VERSION, getCurrentAppVersion, fetchLatestRelease, isNewerVersion, downloadAndInstallApk } from '../services/updateService';
 import { exportBackupData, importBackupData } from '../services/storageService';
 
 interface SettingsModalProps {
@@ -29,6 +29,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onDataImported,
 }) => {
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [currentVersion, setCurrentVersion] = useState(CURRENT_APP_VERSION);
   const [updateStatus, setUpdateStatus] = useState<
     'idle' | 'up-to-date' | 'update-available' | 'error' | 'downloading'
   >('idle');
@@ -37,6 +38,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [statusMessage, setStatusMessage] = useState('');
   const [backupMessage, setBackupMessage] = useState('');
 
+  // Load actual installed app version on mount
+  React.useEffect(() => {
+    getCurrentAppVersion().then(setCurrentVersion);
+  }, []);
+
   // Check updates now
   const handleCheckUpdates = async () => {
     try {
@@ -44,7 +50,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setUpdateStatus('idle');
       setStatusMessage('');
 
-      const release = await fetchLatestRelease(settings.githubRepo);
+      const [release, activeVer] = await Promise.all([
+        fetchLatestRelease(settings.githubRepo),
+        getCurrentAppVersion(),
+      ]);
+
+      setCurrentVersion(activeVer);
 
       if (!release) {
         setUpdateStatus('up-to-date');
@@ -54,12 +65,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
       setLatestRelease(release);
 
-      if (isNewerVersion(release.tagName, CURRENT_APP_VERSION)) {
+      if (isNewerVersion(release.tagName, activeVer)) {
         setUpdateStatus('update-available');
         setStatusMessage(`¡Nueva versión ${release.tagName} disponible!`);
       } else {
         setUpdateStatus('up-to-date');
-        setStatusMessage(`¡Tienes la versión más reciente (${CURRENT_APP_VERSION})!`);
+        setStatusMessage(`¡Tienes la versión más reciente (v${activeVer})!`);
       }
     } catch (e: any) {
       setUpdateStatus('error');
@@ -216,7 +227,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   Actualizaciones de la App
                 </h3>
                 <p className="text-xs text-gray-700 dark:text-gray-300 font-semibold">
-                  Versión actual: <strong className="text-gray-950 dark:text-white font-black">v{CURRENT_APP_VERSION}</strong>
+                  Versión actual: <strong className="text-gray-950 dark:text-white font-black">v{currentVersion}</strong>
                 </p>
               </div>
               <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center border border-emerald-300 dark:border-emerald-800">

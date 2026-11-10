@@ -23,7 +23,7 @@ import {
 import {
   fetchLatestRelease,
   isNewerVersion,
-  CURRENT_APP_VERSION,
+  getCurrentAppVersion,
 } from './services/updateService';
 import { Header } from './components/Header';
 import { SummaryCard } from './components/SummaryCard';
@@ -100,8 +100,11 @@ export const App: React.FC = () => {
     if (settings.autoCheckUpdates) {
       const checkOnLaunch = async () => {
         try {
-          const release = await fetchLatestRelease(settings.githubRepo);
-          if (release && isNewerVersion(release.tagName, CURRENT_APP_VERSION)) {
+          const [release, activeVer] = await Promise.all([
+            fetchLatestRelease(settings.githubRepo),
+            getCurrentAppVersion(),
+          ]);
+          if (release && isNewerVersion(release.tagName, activeVer)) {
             setUpdateRelease(release);
           }
         } catch {

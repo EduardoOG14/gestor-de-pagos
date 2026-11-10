@@ -23,12 +23,29 @@ export interface AppUpdatePlugin {
 export const NativeAppUpdate = registerPlugin<AppUpdatePlugin>('AppUpdate');
 
 /**
+ * Get current installed version dynamically from Android PackageInfo
+ */
+export async function getCurrentAppVersion(): Promise<string> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const info = await NativeAppUpdate.getAppVersion();
+      if (info && info.versionName) {
+        return info.versionName;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return CURRENT_APP_VERSION;
+}
+
+/**
  * Compare two semver-like strings (e.g. "v1.1.0" > "1.0.0")
  */
 export function isNewerVersion(remote: string, current: string): boolean {
   const clean = (v: string) => v.replace(/^v/i, '').trim().split('-')[0];
-  const rParts = clean(remote).split('.').map(n => parseInt(n, 10) || 0);
-  const cParts = clean(current).split('.').map(n => parseInt(n, 10) || 0);
+  const rParts = clean(remote).split('.').map((n) => parseInt(n, 10) || 0);
+  const cParts = clean(current).split('.').map((n) => parseInt(n, 10) || 0);
   const len = Math.max(rParts.length, cParts.length);
   for (let i = 0; i < len; i++) {
     const r = rParts[i] || 0;
@@ -40,27 +57,58 @@ export function isNewerVersion(remote: string, current: string): boolean {
 }
 
 /**
- * Check GitHub releases API for latest published release
+ * Check GitHub releases API for latest published release (with cache-busting)
  */
 export async function fetchLatestRelease(repo: string): Promise<GitHubRelease | null> {
   const cleanRepo = repo.trim().replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$/i, '');
-  const url = `https://api.github.com/repos/${cleanRepo}/releases/latest`;
+  const timestamp = Date.now();
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: 'application/vnd.github.v3+json',
-    },
-  });
+  // Try /releases?per_page=3 first as it bypasses GitHub CDN's 5-minute cache on /releases/latest
+  const listUrl = `https://api.github.com/repos/${cleanRepo}/releases?per_page=3&_t=${timestamp}`;
+  const latestUrl = `https://api.github.com/repos/${cleanRepo}/releases/latest?_t=${timestamp}`;
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      // No releases yet in the repository
-      return null;
+  let data: any = null;
+
+  try {
+    const response = await fetch(listUrl, {
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+      },
+    });
+
+    if (response.ok) {
+      const list = await response.json();
+      if (Array.isArray(list) && list.length > 0) {
+        data = list[0];
+      }
     }
-    throw new Error(`Error ${response.status} al consultar GitHub`);
+  } catch {
+    // Fall back to /releases/latest
   }
 
-  const data = await response.json();
+  if (!data) {
+    const fallbackResponse = await fetch(latestUrl, {
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+      },
+    });
+
+    if (!fallbackResponse.ok) {
+      if (fallbackResponse.status === 404) {
+        return null;
+      }
+      throw new Error(`Error ${fallbackResponse.status} al consultar GitHub`);
+    }
+
+    data = await fallbackResponse.json();
+  }
+
   const tagName = data.tag_name || '';
 
   // Look for .apk asset in the release
@@ -68,8 +116,9 @@ export async function fetchLatestRelease(repo: string): Promise<GitHubRelease | 
   let apkSize: number | undefined;
 
   if (Array.isArray(data.assets)) {
-    const apkAsset = data.assets.find((asset: any) =>
-      typeof asset.name === 'string' && asset.name.toLowerCase().endsWith('.apk')
+    const apkAsset = data.assets.find(
+      (asset: any) =>
+        typeof asset.name === 'string' && asset.name.toLowerCase().endsWith('.apk')
     );
     if (apkAsset) {
       apkDownloadUrl = apkAsset.browser_download_url;
