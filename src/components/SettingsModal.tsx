@@ -106,15 +106,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   // Backup Export
-  const handleExportBackup = () => {
+  const handleExportBackup = async () => {
     try {
       const dataStr = exportBackupData();
+      const date = new Date().toISOString().split('T')[0];
+      const fileName = `cuaderno_deudas_backup_${date}.json`;
+
+      // Try native Android file sharing first (Google Drive, WhatsApp, Files)
+      try {
+        const file = new File([dataStr], fileName, { type: 'application/json' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Respaldo Cuaderno de Pagos',
+            text: `Copia de seguridad de deudas y abonos (${date})`,
+          });
+          setBackupMessage('✅ Copia de seguridad exportada con éxito.');
+          setTimeout(() => setBackupMessage(''), 4000);
+          return;
+        }
+      } catch (shareErr: any) {
+        if (shareErr?.name === 'AbortError') return; // User closed share sheet
+      }
+
+      // Fallback: standard file download
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const date = new Date().toISOString().split('T')[0];
       a.href = url;
-      a.download = `cuaderno_deudas_backup_${date}.json`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -220,14 +240,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* SECTION 2: APP UPDATES (GitHub Releases) */}
-          <div className="bg-gray-50 dark:bg-gray-750 rounded-3xl p-4.5 border-2 border-gray-300 dark:border-gray-700 space-y-3.5">
+          <div className="bg-gray-100 dark:bg-gray-900 rounded-3xl p-4.5 border-2 border-gray-300 dark:border-gray-700 space-y-3.5">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-black text-gray-950 dark:text-white uppercase tracking-wider">
                   Actualizaciones de la App
                 </h3>
                 <p className="text-xs text-gray-700 dark:text-gray-300 font-semibold">
-                  Versión actual: <strong className="text-gray-950 dark:text-white font-black">v{currentVersion}</strong>
+                  Versión actual: <strong className="text-emerald-700 dark:text-emerald-400 font-black">v{currentVersion}</strong>
                 </p>
               </div>
               <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center border border-emerald-300 dark:border-emerald-800">
@@ -238,7 +258,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
 
             {/* Toggle: Automatic check on startup */}
-            <label className="flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 cursor-pointer shadow-2xs">
+            <label className="flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 cursor-pointer shadow-2xs">
               <span className="text-xs font-black text-gray-900 dark:text-gray-100">
                 Comprobar actualizaciones al abrir la app
               </span>

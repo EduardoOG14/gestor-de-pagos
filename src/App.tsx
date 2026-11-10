@@ -27,13 +27,15 @@ import {
 } from './services/updateService';
 import { Header } from './components/Header';
 import { SummaryCard } from './components/SummaryCard';
-import { SearchBar, type FilterStatus } from './components/SearchBar';
+import { SearchBar, type FilterStatus, type SortOption } from './components/SearchBar';
 import { PersonCard } from './components/PersonCard';
 import { PersonDetailModal } from './components/PersonDetailModal';
 import { AddPersonModal } from './components/AddPersonModal';
 import { AddTransactionModal } from './components/AddTransactionModal';
 import { SettingsModal } from './components/SettingsModal';
 import { UpdateDialog } from './components/UpdateDialog';
+import { StatementModal } from './components/StatementModal';
+import { MonthlyReportModal } from './components/MonthlyReportModal';
 
 export const App: React.FC = () => {
   // Persistent Settings
@@ -43,18 +45,21 @@ export const App: React.FC = () => {
   const [persons, setPersons] = useState<Person[]>(loadPersons);
   const [transactions, setTransactions] = useState<Transaction[]>(loadTransactions);
 
-  // Search & Filter
+  // Search, Filter & Sort
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('ALL');
+  const [sortBy, setSortBy] = useState<SortOption>('HIGHEST_DEBT');
 
   // Modals & Navigation
   const [showAddPersonModal, setShowAddPersonModal] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+  const [statementPersonId, setStatementPersonId] = useState<string | null>(null);
   const [transactionModalTarget, setTransactionModalTarget] = useState<{
     personId: string;
     type: TransactionType;
   } | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showMonthlyReportModal, setShowMonthlyReportModal] = useState(false);
   const [updateRelease, setUpdateRelease] = useState<GitHubRelease | null>(null);
 
   // Apply Theme
@@ -136,6 +141,30 @@ export const App: React.FC = () => {
     return personsWithBalances.filter((p) => p.totalDebt <= 0).length;
   }, [personsWithBalances]);
 
+  // Arqueo del día: Cobrado hoy
+  const { collectedToday, todayPaymentCount } = useMemo(() => {
+    const today = new Date();
+    let sum = 0;
+    let count = 0;
+
+    for (const tx of transactions) {
+      if (tx.type === 'PAYMENT') {
+        const txDate = new Date(tx.date || tx.createdAt);
+        const isSameDay =
+          txDate.getFullYear() === today.getFullYear() &&
+          txDate.getMonth() === today.getMonth() &&
+          txDate.getDate() === today.getDate();
+
+        if (isSameDay) {
+          sum += tx.amount;
+          count++;
+        }
+      }
+    }
+
+    return { collectedToday: sum, todayPaymentCount: count };
+  }, [transactions]);
+
   // Filtered persons
   const filteredPersons = useMemo(() => {
     return personsWithBalances.filter((person) => {
@@ -156,11 +185,51 @@ export const App: React.FC = () => {
     });
   }, [personsWithBalances, filterStatus, searchTerm]);
 
+  // Sorted persons (Mayor deuda primero, Recientes, A-Z)
+  const sortedPersons = useMemo(() => {
+    const list = [...filteredPersons];
+
+    switch (sortBy) {
+      case 'HIGHEST_DEBT':
+        return list.sort((a, b) => {
+          if (b.totalDebt !== a.totalDebt) {
+            return b.totalDebt - a.totalDebt; // Highest debt on top
+          }
+          const timeA = a.lastTransaction ? new Date(a.lastTransaction.date).getTime() : 0;
+          const timeB = b.lastTransaction ? new Date(b.lastTransaction.date).getTime() : 0;
+          return timeB - timeA;
+        });
+
+      case 'RECENT':
+        return list.sort((a, b) => {
+          const timeA = a.lastTransaction
+            ? new Date(a.lastTransaction.date).getTime()
+            : new Date(a.createdAt).getTime();
+          const timeB = b.lastTransaction
+            ? new Date(b.lastTransaction.date).getTime()
+            : new Date(b.createdAt).getTime();
+          return timeB - timeA;
+        });
+
+      case 'NAME':
+        return list.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+
+      default:
+        return list;
+    }
+  }, [filteredPersons, sortBy]);
+
   // Selected person for detail view
   const currentSelectedPerson = useMemo(() => {
     if (!selectedPersonId) return null;
     return personsWithBalances.find((p) => p.id === selectedPersonId) || null;
   }, [selectedPersonId, personsWithBalances]);
+
+  // Selected person for statement view
+  const currentStatementPerson = useMemo(() => {
+    if (!statementPersonId) return null;
+    return personsWithBalances.find((p) => p.id === statementPersonId) || null;
+  }, [statementPersonId, personsWithBalances]);
 
   const currentPersonTransactions = useMemo(() => {
     if (!selectedPersonId) return [];
@@ -245,6 +314,7 @@ export const App: React.FC = () => {
         theme={settings.theme}
         onToggleTheme={handleToggleTheme}
         onOpenSettings={() => setShowSettingsModal(true)}
+        onOpenMonthlyReport={() => setShowMonthlyReportModal(true)}
         pendingCount={debtorCount}
       />
 
@@ -256,6 +326,9 @@ export const App: React.FC = () => {
           debtorCount={debtorCount}
           clearedCount={clearedCount}
           currencySymbol={settings.currencySymbol}
+          collectedToday={collectedToday}
+          todayPaymentCount={todayPaymentCount}
+          onOpenMonthlyReport={() => setShowMonthlyReportModal(true)}
         />
 
         {/* Search & Filter Tabs */}
@@ -264,6 +337,8 @@ export const App: React.FC = () => {
           onSearchChange={setSearchTerm}
           activeFilter={filterStatus}
           onFilterChange={setFilterStatus}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
           totalCount={personsWithBalances.length}
           pendingCount={debtorCount}
           clearedCount={clearedCount}
@@ -271,7 +346,7 @@ export const App: React.FC = () => {
 
         {/* Debtor List */}
         <div className="space-y-3 pt-1">
-          {filteredPersons.length === 0 ? (
+          {sortedPersons.length === 0 ? (
             <div className="text-center py-12 px-6 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 space-y-3">
               <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                 <BookOpen className="w-7 h-7" />
@@ -297,7 +372,7 @@ export const App: React.FC = () => {
               )}
             </div>
           ) : (
-            filteredPersons.map((person) => (
+            sortedPersons.map((person) => (
               <PersonCard
                 key={person.id}
                 person={person}
@@ -309,6 +384,7 @@ export const App: React.FC = () => {
                 onAddPayment={() =>
                   setTransactionModalTarget({ personId: person.id, type: 'PAYMENT' })
                 }
+                onOpenStatement={() => setStatementPersonId(person.id)}
               />
             ))
           )}
@@ -356,8 +432,19 @@ export const App: React.FC = () => {
             })
           }
           onQuickSettle={() => handleQuickSettle(currentSelectedPerson)}
+          onOpenStatement={() => setStatementPersonId(currentSelectedPerson.id)}
           onDeleteTransaction={handleDeleteTransaction}
           onDeletePerson={() => handleDeletePerson(currentSelectedPerson.id)}
+        />
+      )}
+
+      {/* Modal: Statement & WhatsApp Extract */}
+      {currentStatementPerson && (
+        <StatementModal
+          person={currentStatementPerson}
+          transactions={transactions}
+          currencySymbol={settings.currencySymbol}
+          onClose={() => setStatementPersonId(null)}
         />
       )}
 
@@ -381,6 +468,16 @@ export const App: React.FC = () => {
           onUpdateSettings={handleUpdateSettings}
           onClose={() => setShowSettingsModal(false)}
           onDataImported={handleDataReload}
+        />
+      )}
+
+      {/* Modal: Monthly Report */}
+      {showMonthlyReportModal && (
+        <MonthlyReportModal
+          transactions={transactions}
+          persons={persons}
+          currencySymbol={settings.currencySymbol}
+          onClose={() => setShowMonthlyReportModal(false)}
         />
       )}
 

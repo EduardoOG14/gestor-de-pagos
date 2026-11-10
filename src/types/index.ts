@@ -23,6 +23,11 @@ export interface PersonWithBalance extends Person {
   totalDebt: number; // sum(DEBT) - sum(PAYMENT)
   lastTransaction?: Transaction;
   transactionCount: number;
+  dormantAlert?: {
+    days: number;
+    label: string;
+    level: 'warning' | 'danger';
+  } | null;
 }
 
 export type ThemeMode = 'light' | 'dark' | 'system';

@@ -24,7 +24,7 @@ export const AddPersonModal: React.FC<AddPersonModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Por favor escribe el nombre de la persona (ej. Carlos Mecánico)');
+      setError('Por favor escribe el nombre de la persona (ej. Juanito Pérez)');
       return;
     }
 
@@ -86,7 +86,7 @@ export const AddPersonModal: React.FC<AddPersonModalProps> = ({
                 setName(e.target.value);
                 if (error) setError('');
               }}
-              placeholder="Ej: Carlos Mecánico, María Vecina..."
+              placeholder="Ej: Juanito Pérez, María Gómez..."
               className="w-full px-4 py-3.5 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-500 rounded-2xl text-base font-bold text-gray-950 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
             />
           </div>
@@ -131,13 +131,13 @@ export const AddPersonModal: React.FC<AddPersonModalProps> = ({
           {parseFloat(initialDebt) > 0 && (
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-gray-900 dark:text-gray-100 mb-1.5">
-                ¿Por qué motivo debe este monto?
+                ¿Qué prenda o motivo originó esta deuda?
               </label>
               <input
                 type="text"
                 value={initialConcept}
                 onChange={(e) => setInitialConcept(e.target.value)}
-                placeholder="Ej: Reparación de camioneta, repuestos, préstamo..."
+                placeholder="Ej: Pantalón, Zapatos, Camisa, Vestido..."
                 className="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-500 rounded-2xl text-sm font-semibold text-gray-950 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -166,7 +166,7 @@ export const AddPersonModal: React.FC<AddPersonModalProps> = ({
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ej: Taller en la esquina"
+                placeholder="Ej: Vecino, Amigo del trabajo..."
                 className="w-full px-3.5 py-2.5 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-500 rounded-xl text-sm font-semibold text-gray-950 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>

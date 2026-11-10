@@ -1,4 +1,5 @@
 import type { Person, Transaction, PersonWithBalance, AppSettings } from '../types';
+import { getDormantDebtorAlert } from '../utils/debtorAlerts';
 
 const STORAGE_KEY_PERSONS = 'gestor_pagos_persons_v1';
 const STORAGE_KEY_TRANSACTIONS = 'gestor_pagos_transactions_v1';
@@ -11,17 +12,17 @@ export const DEFAULT_SETTINGS: AppSettings = {
   currencySymbol: '$',
 };
 
-// Seed initial data matching the user's explicit example
+// Seed initial data
 function getInitialSeed(): { persons: Person[]; transactions: Transaction[] } {
-  const initialPersonId = 'seed-carlos-mecanico';
+  const initialPersonId = 'seed-juanito-perez';
   const now = new Date().toISOString();
 
   const persons: Person[] = [
     {
       id: initialPersonId,
-      name: 'Carlos Mecánico',
+      name: 'Juanito Pérez',
       phone: '',
-      notes: 'Control interno de taller / repuestos',
+      notes: 'Cliente de ropa',
       createdAt: now,
       updatedAt: now,
     },
@@ -32,8 +33,8 @@ function getInitialSeed(): { persons: Person[]; transactions: Transaction[] } {
       id: 'tx-seed-1',
       personId: initialPersonId,
       type: 'DEBT',
-      amount: 360,
-      concept: 'Reparación y repuestos',
+      amount: 50,
+      concept: 'Compra de camisa',
       date: now,
       createdAt: now,
     },
@@ -130,11 +131,15 @@ export function calculatePersonsWithBalances(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
+    const roundedDebt = Math.round(totalDebt * 100) / 100;
+    const dormantAlert = getDormantDebtorAlert(roundedDebt, personTxs, person.createdAt);
+
     return {
       ...person,
-      totalDebt: Math.round(totalDebt * 100) / 100,
+      totalDebt: roundedDebt,
       lastTransaction: sortedTxs[0],
       transactionCount: personTxs.length,
+      dormantAlert,
     };
   });
 }

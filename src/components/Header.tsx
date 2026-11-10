@@ -1,11 +1,12 @@
 import React from 'react';
-import { BookOpen, Settings, Sun, Moon } from 'lucide-react';
+import { BookOpen, Settings, Sun, Moon, BarChart3 } from 'lucide-react';
 import type { ThemeMode } from '../types';
 
 interface HeaderProps {
   theme: ThemeMode;
   onToggleTheme: () => void;
   onOpenSettings: () => void;
+  onOpenMonthlyReport: () => void;
   pendingCount: number;
 }
 
@@ -13,6 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
   theme,
   onToggleTheme,
   onOpenSettings,
+  onOpenMonthlyReport,
   pendingCount,
 }) => {
   const isDark = theme === 'dark' || (theme === 'system' && document.documentElement.classList.contains('dark'));
@@ -35,8 +37,18 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons: Theme Toggle & Settings */}
+        {/* Action Buttons: Monthly Report, Theme Toggle & Settings */}
         <div className="flex items-center gap-2">
+          {/* Monthly Report Button */}
+          <button
+            onClick={onOpenMonthlyReport}
+            aria-label="Ver Cobros por Mes"
+            className="w-11 h-11 rounded-2xl flex items-center justify-center bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/70 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 transition-colors shadow-2xs"
+            title="Ver cobros por mes"
+          >
+            <BarChart3 className="w-5 h-5" />
+          </button>
+
           {/* Quick Theme Switcher */}
           <button
             onClick={onToggleTheme}

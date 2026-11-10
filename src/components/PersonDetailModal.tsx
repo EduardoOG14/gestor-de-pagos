@@ -9,8 +9,11 @@ import {
   Calendar,
   CheckCircle,
   AlertTriangle,
+  FileText,
 } from 'lucide-react';
 import type { PersonWithBalance, Transaction } from '../types';
+import { getCollectionReminderMessage } from '../utils/reminderHelper';
+import { getPaymentReceiptMessage } from '../utils/debtorAlerts';
 
 interface PersonDetailModalProps {
   person: PersonWithBalance;
@@ -20,6 +23,7 @@ interface PersonDetailModalProps {
   onAddDebt: () => void;
   onAddPayment: () => void;
   onQuickSettle: () => void;
+  onOpenStatement: () => void;
   onDeleteTransaction: (txId: string) => void;
   onDeletePerson: () => void;
 }
@@ -32,6 +36,7 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
   onAddDebt,
   onAddPayment,
   onQuickSettle,
+  onOpenStatement,
   onDeleteTransaction,
   onDeletePerson,
 }) => {
@@ -52,9 +57,12 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
 
   const handleWhatsApp = () => {
     const phoneClean = (person.phone || '').replace(/[^0-9]/g, '');
-    const message = encodeURIComponent(
-      `Hola ${person.name} 👋 Te escribo para comentarte sobre el saldo pendiente de ${currencySymbol}${formattedAmount} en nuestro cuaderno de control. Por favor me avisas cuando puedas revisarlo. ¡Muchas gracias!`
+    const reminderText = getCollectionReminderMessage(
+      person.name,
+      formattedAmount,
+      currencySymbol
     );
+    const message = encodeURIComponent(reminderText);
     const url = phoneClean
       ? `https://wa.me/${phoneClean}?text=${message}`
       : `https://wa.me/?text=${message}`;
@@ -65,6 +73,28 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
     if (person.phone) {
       window.open(`tel:${person.phone}`, '_self');
     }
+  };
+
+  const handleSendPaymentReceipt = (tx: Transaction) => {
+    const phoneClean = (person.phone || '').replace(/[^0-9]/g, '');
+    const amountPaidStr = new Intl.NumberFormat('es-ES', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(tx.amount);
+
+    const message = encodeURIComponent(
+      getPaymentReceiptMessage(
+        person.name,
+        amountPaidStr,
+        tx.concept,
+        formattedAmount,
+        currencySymbol
+      )
+    );
+    const url = phoneClean
+      ? `https://wa.me/${phoneClean}?text=${message}`
+      : `https://wa.me/?text=${message}`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -133,6 +163,20 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
               {transactions.length}{' '}
               {transactions.length === 1 ? 'movimiento registrado' : 'movimientos registrados'}
             </p>
+
+            {person.dormantAlert && (
+              <div className="mt-2.5 flex justify-center">
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border tracking-wide shadow-2xs ${
+                    person.dormantAlert.level === 'danger'
+                      ? 'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800'
+                      : 'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800'
+                  }`}
+                >
+                  <span>{person.dormantAlert.label}</span>
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Quick Contact Bar if Phone is present */}
@@ -174,6 +218,15 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
               <span>Anotar Deuda (+)</span>
             </button>
           </div>
+
+          {/* Extract History & Share on WhatsApp Button */}
+          <button
+            onClick={onOpenStatement}
+            className="w-full py-3.5 px-4 rounded-2xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950 dark:hover:bg-indigo-900 text-indigo-950 dark:text-indigo-100 font-black text-xs flex items-center justify-center gap-2 transition border-2 border-indigo-300 dark:border-indigo-700 shadow-2xs"
+          >
+            <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <span>Sacar Historial Completo (WhatsApp)</span>
+          </button>
 
           {/* 1-Tap Quick Settle Button if they have debt */}
           {isOwing && (
@@ -245,6 +298,18 @@ export const PersonDetailModal: React.FC<PersonDetailModalProps> = ({
                           {isTxDebt ? '+' : '-'} {currencySymbol}
                           {Number(tx.amount).toFixed(2)}
                         </span>
+
+                        {/* Send Receipt button if it's an abono/payment */}
+                        {!isTxDebt && (
+                          <button
+                            onClick={() => handleSendPaymentReceipt(tx)}
+                            className="p-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 transition"
+                            title="Enviar comprobante de este abono por WhatsApp"
+                            aria-label="Enviar recibo por WhatsApp"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </button>
+                        )}
 
                         {/* Delete single transaction */}
                         {deletingTxId === tx.id ? (

@@ -1,6 +1,7 @@
 import React from 'react';
-import { ChevronRight, PlusCircle, MinusCircle, MessageCircle, Clock } from 'lucide-react';
+import { ChevronRight, PlusCircle, MinusCircle, MessageCircle, Clock, FileText } from 'lucide-react';
 import type { PersonWithBalance } from '../types';
+import { getCollectionReminderMessage } from '../utils/reminderHelper';
 
 interface PersonCardProps {
   person: PersonWithBalance;
@@ -8,6 +9,7 @@ interface PersonCardProps {
   onClick: () => void;
   onAddDebt: () => void;
   onAddPayment: () => void;
+  onOpenStatement: () => void;
 }
 
 export const PersonCard: React.FC<PersonCardProps> = ({
@@ -16,6 +18,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({
   onClick,
   onAddDebt,
   onAddPayment,
+  onOpenStatement,
 }) => {
   const isOwing = person.totalDebt > 0;
   const isCleared = person.totalDebt === 0;
@@ -29,9 +32,12 @@ export const PersonCard: React.FC<PersonCardProps> = ({
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneClean = (person.phone || '').replace(/[^0-9]/g, '');
-    const message = encodeURIComponent(
-      `Hola ${person.name} 👋 Te escribo para comentarte sobre el saldo pendiente de ${currencySymbol}${formattedAmount} en nuestro cuaderno de control. Por favor me avisas cuando puedas revisarlo. ¡Muchas gracias!`
+    const reminderText = getCollectionReminderMessage(
+      person.name,
+      formattedAmount,
+      currencySymbol
     );
+    const message = encodeURIComponent(reminderText);
     const url = phoneClean
       ? `https://wa.me/${phoneClean}?text=${message}`
       : `https://wa.me/?text=${message}`;
@@ -92,10 +98,25 @@ export const PersonCard: React.FC<PersonCardProps> = ({
         </div>
       </div>
 
-      {/* Middle Row: Last transaction hint - Clean, High Contrast, Super Legible */}
+      {/* Dormant Debtor Alert (Tiempo sin abonar) */}
+      {person.dormantAlert && (
+        <div className="mb-2.5">
+          <span
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black border tracking-wide shadow-2xs ${
+              person.dormantAlert.level === 'danger'
+                ? 'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800'
+                : 'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800'
+            }`}
+          >
+            <span>{person.dormantAlert.label}</span>
+          </span>
+        </div>
+      )}
+
+      {/* Middle Row: Last transaction hint */}
       {lastTx && (
         <div
-          className={`flex items-center gap-2 text-xs mb-3.5 px-3 py-2 rounded-2xl border font-medium ${
+          className={`flex items-center gap-2 text-xs mb-3 px-3 py-2 rounded-2xl border font-medium ${
             isLastTxDebt
               ? 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-gray-900 dark:text-gray-100'
               : 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/60 text-gray-900 dark:text-gray-100'
@@ -123,17 +144,17 @@ export const PersonCard: React.FC<PersonCardProps> = ({
       )}
 
       {/* Bottom Row: Quick Action Buttons (Don't Make Me Think) */}
-      <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center gap-1.5 pt-2 border-t border-gray-200 dark:border-gray-700">
         {/* Quick Payment Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onAddPayment();
           }}
-          className="flex-1 py-3 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-sm transition"
-          title="Registrar un abono o pago de esta persona"
+          className="flex-1 py-2.5 px-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1 shadow-sm transition"
+          title="Registrar un abono o pago"
         >
-          <MinusCircle className="w-4 h-4 text-emerald-100" />
+          <MinusCircle className="w-4 h-4 text-emerald-100 shrink-0" />
           <span>Abonar</span>
         </button>
 
@@ -143,26 +164,39 @@ export const PersonCard: React.FC<PersonCardProps> = ({
             e.stopPropagation();
             onAddDebt();
           }}
-          className="flex-1 py-3 px-3 rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-sm transition"
-          title="Añadir una nueva deuda a esta persona"
+          className="flex-1 py-2.5 px-2 rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-xs flex items-center justify-center gap-1 shadow-sm transition"
+          title="Añadir una nueva deuda"
         >
-          <PlusCircle className="w-4 h-4 text-rose-100" />
+          <PlusCircle className="w-4 h-4 text-rose-100 shrink-0" />
           <span>+ Deuda</span>
+        </button>
+
+        {/* Statement / Historial Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenStatement();
+          }}
+          className="py-2.5 px-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-black text-xs flex items-center justify-center gap-1 transition"
+          title="Sacar historial de deudas y abonos para WhatsApp"
+        >
+          <FileText className="w-4 h-4 shrink-0" />
+          <span>Historial</span>
         </button>
 
         {/* WhatsApp Button */}
         <button
           onClick={handleWhatsApp}
-          className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center transition shrink-0"
-          title="Enviar recordatorio de deuda por WhatsApp"
+          className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center transition shrink-0"
+          title="Enviar recordatorio rápido por WhatsApp"
           aria-label="Recordar por WhatsApp"
         >
           <MessageCircle className="w-5 h-5" />
         </button>
 
         {/* Open Details Arrow */}
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-gray-700 shrink-0">
-          <ChevronRight className="w-5 h-5" />
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-gray-700 shrink-0">
+          <ChevronRight className="w-4 h-4" />
         </div>
       </div>
     </div>
